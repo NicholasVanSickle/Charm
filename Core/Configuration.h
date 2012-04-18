@@ -34,6 +34,14 @@ public:
 
     static Configuration& instance();
 
+    //used for --INI support, create a QSettings parented to
+    //parent that can be set to dump to an ini file instead of
+    //the platform native location
+    void createGlobalSettings(QObject* parent=0);
+    //gets the settings instance that should be used app wide
+    //for --INI support
+    QSettings* settings();
+
     void writeTo( QSettings& );
     // read the configuration from the settings object
     // this will not modify the settings group etc but just use it
@@ -65,6 +73,7 @@ public:
     // appearance properties
     int taskPaddingLength; // auto-determined
 private:
+    QSettings* m_settings;
     // allow test classes to create configuration objects (tests are
     // the only  application that can have (test) multiple
     // configurations):

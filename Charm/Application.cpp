@@ -68,6 +68,9 @@ Application::Application(int& argc, char** argv)
     QCoreApplication::setApplicationName("Charm");
     QCoreApplication::setApplicationVersion(CHARM_VERSION);
 
+    //create a globally used QSettings instance
+    CONFIGURATION.createGlobalSettings(this);
+
     QLocalSocket uniqueApplicationSocket;
     QString serverName( "com.kdab.charm" );
 #ifndef NDEBUG
@@ -523,11 +526,11 @@ bool Application::configure()
         }
     }
 
-    // load configuration:
-    QSettings settings;
-    settings.beginGroup(CONFIGURATION.configurationName);
+    // load configuration:    
+    QSettings *settings = CONFIGURATION.settings();
+    settings->beginGroup(CONFIGURATION.configurationName);
 
-    bool configurationComplete = CONFIGURATION.readFrom(settings);
+    bool configurationComplete = CONFIGURATION.readFrom(*settings);
 
     if (!configurationComplete || CONFIGURATION.failure)
     {
@@ -554,7 +557,7 @@ bool Application::configure()
         if (dialog.exec())
         {
             CONFIGURATION = dialog.configuration();
-            CONFIGURATION.writeTo(settings);
+            CONFIGURATION.writeTo(*settings);
             mainView().show();
         }
         else
@@ -650,9 +653,9 @@ void Application::slotControllerReadyToQuit()
 
 void Application::slotSaveConfiguration()
 {
-    QSettings settings;
-    settings.beginGroup(CONFIGURATION.configurationName);
-    CONFIGURATION.writeTo(settings);
+    QSettings *settings = CONFIGURATION.settings();
+    settings->beginGroup(CONFIGURATION.configurationName);
+    CONFIGURATION.writeTo(*settings);
     if (state() == Connected)
     {
         m_controller.persistMetaData(CONFIGURATION);
@@ -723,14 +726,14 @@ void Application::saveState( QSessionManager & manager )
 {
     //qDebug() << "saveState(QSessionManager)";
     if (m_state == Connected) {
-        //QSettings settings;
+        //QSettings *settings = CONFIGURATION.settings();
         //const QString prefix = manager.sessionId() + '/';
         //qDebug() << "saveState" << prefix << "tasksWindow:" << m_tasksWindow.geometry();
         // Visibility is done already. TODO: desktop number?
-        //settings.setValue(prefix + "tasks_window_shown", m_tasksWindow.isVisible());
-        //settings.setValue(prefix + "event_window_shown", m_eventWindow.isVisible());
-        //settings.setValue(prefix + "timetracker_window_shown", m_timeTracker.isVisible());
-        //settings.setValue(prefix + "tasks_window_geometry", m_tasksWindow.geometry());
+        //settings->setValue(prefix + "tasks_window_shown", m_tasksWindow.isVisible());
+        //settings->setValue(prefix + "event_window_shown", m_eventWindow.isVisible());
+        //settings->setValue(prefix + "timetracker_window_shown", m_timeTracker.isVisible());
+        //settings->setValue(prefix + "tasks_window_geometry", m_tasksWindow.geometry());
 
         m_tasksWindow.saveGuiState();
         m_eventWindow.saveGuiState();

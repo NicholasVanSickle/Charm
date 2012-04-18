@@ -1,5 +1,6 @@
 #include <QtDebug>
 #include <QSettings>
+#include <QStringList>
 
 #include "Configuration.h"
 #include "CharmConstants.h"
@@ -14,6 +15,27 @@ Configuration& Configuration::instance()
 {
     static Configuration configuration;
     return configuration;
+}
+
+void Configuration::createGlobalSettings(QObject *parent)
+{
+    const QString iniArgument = "--ini";
+    QStringList args = QCoreApplication::arguments();
+    foreach (const QString& arg, args)
+    {
+        if(arg.startsWith(iniArgument, Qt::CaseInsensitive))
+        {
+            m_settings = new QSettings(arg.right(arg.length()-iniArgument.length()-1), QSettings::IniFormat, parent);
+            return;
+        }
+    }
+    m_settings = new QSettings(parent);
+}
+
+QSettings *Configuration::settings()
+{
+    Q_ASSERT_X(m_settings, "Configuration::settings()", "m_settings is NULL -- failure to call Configuration::createGlobalSettings?");
+    return m_settings;
 }
 
 Configuration::Configuration()
