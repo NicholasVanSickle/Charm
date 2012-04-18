@@ -4,7 +4,7 @@
 #include "CommandModifyEvent.h"
 
 CommandModifyEvent::CommandModifyEvent( const Event& event, QObject* parent )
-    : CharmCommand( parent )
+    : CharmCommand( "modify event", parent )
     , m_event( event )
 {
 }

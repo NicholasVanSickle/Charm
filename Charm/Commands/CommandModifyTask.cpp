@@ -7,7 +7,7 @@
 #include "CommandModifyTask.h"
 
 CommandModifyTask::CommandModifyTask( const Task& task, QObject* parent )
-    : CharmCommand( parent )
+    : CharmCommand( "edit task", parent )
     , m_task( task )
     , m_success( false )
 {

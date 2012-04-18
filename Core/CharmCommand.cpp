@@ -1,9 +1,10 @@
 #include "CommandEmitterInterface.h"
 #include "CharmCommand.h"
 
-CharmCommand::CharmCommand( QObject* parent )
+CharmCommand::CharmCommand( const char *text, QObject *parent )
     : QObject( parent )
 {
+    m_commandText = tr(text);
     CommandEmitterInterface* emitter = dynamic_cast<CommandEmitterInterface*>( parent );
     if ( emitter ) {
         m_owner = emitter;
@@ -18,9 +19,24 @@ CharmCommand::~CharmCommand()
 {
 }
 
+QString CharmCommand::commandText()
+{
+    return m_commandText;
+}
+
 CommandEmitterInterface* CharmCommand::owner() const
 {
     return m_owner;
+}
+
+void CharmCommand::requestExecute()
+{
+    emit emitExecute(this);
+}
+
+void CharmCommand::requestRollback()
+{
+    emit emitRollback(this);
 }
 
 #include "CharmCommand.moc"

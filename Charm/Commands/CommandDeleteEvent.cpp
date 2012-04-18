@@ -3,7 +3,7 @@
 #include "CommandDeleteEvent.h"
 
 CommandDeleteEvent::CommandDeleteEvent( const Event& event, QObject* parent )
-    : CharmCommand( parent )
+    : CharmCommand( "delete event", parent )
     , m_event( event )
 {
 }
@@ -22,6 +22,12 @@ bool CommandDeleteEvent::execute( ControllerInterface* controller )
     qDebug() << "CommandDeleteEvent::execute: deleting:";
     m_event.dump();
     return controller->deleteEvent( m_event );
+}
+
+bool CommandDeleteEvent::rollback(ControllerInterface *controller)
+{
+    m_event = controller->cloneEvent(m_event);
+    return m_event.isValid();
 }
 
 bool CommandDeleteEvent::finalize()

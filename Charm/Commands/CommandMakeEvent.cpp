@@ -8,14 +8,14 @@
 
 CommandMakeEvent::CommandMakeEvent( const Task& task,
                                     QObject* parent )
-    : CharmCommand( parent )
+    : CharmCommand( "create event", parent )
     , m_task( task )
 {
 }
 
 CommandMakeEvent::CommandMakeEvent( const Event& event,
                                     QObject* parent )
-    : CharmCommand( parent )
+    : CharmCommand( "create event", parent )
     , m_event( event )
 {
 }

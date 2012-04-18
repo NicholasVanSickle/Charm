@@ -8,7 +8,7 @@
 #include "CommandDeleteTask.h"
 
 CommandDeleteTask::CommandDeleteTask( const Task& task, QObject* parent )
-    : CharmCommand( parent )
+    : CharmCommand( "delete task", parent )
     , m_task( task )
     , m_success( false )
 {

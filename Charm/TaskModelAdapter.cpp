@@ -349,7 +349,6 @@ void TaskModelAdapter::commitCommand( CharmCommand* command )
 {
     Q_ASSERT( command->owner() == this );
     command->finalize();
-    delete command;
 }
 
 #include "TaskModelAdapter.moc"

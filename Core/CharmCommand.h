@@ -38,19 +38,32 @@ class CharmCommand : public QObject
     Q_OBJECT
 
 public:
-    explicit CharmCommand( QObject* parent = 0 );
+    CharmCommand( const char* text, QObject* parent = 0 );
     virtual ~CharmCommand();
+
+    QString commandText();
 
     virtual bool prepare() = 0;
     virtual bool execute( ControllerInterface* controller ) = 0;
+    virtual bool rollback( ControllerInterface* controller ) { return false; }
     virtual bool finalize() = 0;
 
     CommandEmitterInterface* owner() const;
+
+    //used by UndoCharmCommandWrapper to forward requested execute/rollback
+    //forwards to emitExecute/emitRollback
+    void requestExecute();
+    void requestRollback();
+
+signals:
+    void emitExecute(CharmCommand*);
+    void emitRollback(CharmCommand*);
 
 private:
     CharmCommand( const CharmCommand& ); // disallow copying
 
     CommandEmitterInterface* m_owner;
+    QString m_commandText;
 };
 
 #endif

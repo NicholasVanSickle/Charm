@@ -10,7 +10,7 @@
 #include "CommandExportToXml.h"
 
 CommandExportToXml::CommandExportToXml( QString filename, QObject* parent )
-    : CharmCommand( parent )
+    : CharmCommand( "export to XML", parent )
     , m_error( false )
     , m_filename( filename )
 {

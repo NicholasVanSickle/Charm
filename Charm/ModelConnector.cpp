@@ -53,7 +53,6 @@ void ModelConnector::commitCommand( CharmCommand* command )
                  << command->metaObject()->className()
                  << "command has failed";
     }
-    delete command;
 }
 
 void ModelConnector::slotMakeAndActivateEvent( const Task& task )

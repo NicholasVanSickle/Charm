@@ -31,6 +31,8 @@
 EventView::EventView( QToolBar* toolBar, QWidget* parent )
     : QWidget( parent )
     , m_model( 0 )
+	, m_actionUndo( this )
+	, m_actionRedo( this )
     , m_actionNewEvent( this )
     , m_actionEditEvent( this )
     , m_actionDeleteEvent( this )
@@ -61,6 +63,24 @@ EventView::EventView( QToolBar* toolBar, QWidget* parent )
 //              SLOT( slotCommitTimeout() ) );
 //     m_commitTimer.setSingleShot( true );
 
+	m_actionUndo.setText(tr("Undo"));
+	m_actionUndo.setToolTip(tr("Undo the latest change"));
+	m_actionUndo.setShortcut(QKeySequence::Undo);
+    m_actionUndo.setEnabled(false);
+
+	m_actionRedo.setText(tr("Redo"));
+	m_actionRedo.setToolTip(tr("Redo the last undone change."));
+	m_actionRedo.setShortcut(QKeySequence::Redo);
+    m_actionRedo.setEnabled(false);
+
+    m_undoStack = new QUndoStack(this);
+    connect(m_undoStack, SIGNAL(canUndoChanged(bool)), &m_actionUndo, SLOT(setEnabled(bool)));
+    connect(m_undoStack, SIGNAL(undoTextChanged(QString)), this, SLOT(slotUndoTextChanged(QString)));
+    connect(&m_actionUndo, SIGNAL(triggered()), m_undoStack, SLOT(undo()));
+
+    connect(m_undoStack, SIGNAL(canRedoChanged(bool)), &m_actionRedo, SLOT(setEnabled(bool)));
+    connect(m_undoStack, SIGNAL(redoTextChanged(QString)), this, SLOT(slotRedoTextChanged(QString)));
+    connect(&m_actionRedo, SIGNAL(triggered()), m_undoStack, SLOT(redo()));
 
     m_actionNewEvent.setText( tr( "New Event..." ) );
     m_actionNewEvent.setToolTip( tr( "Create a new Event" ) );
@@ -122,6 +142,9 @@ void EventView::delayedInitialization()
 
 void EventView::populateEditMenu( QMenu* menu )
 {
+    menu->addAction( &m_actionUndo );
+    menu->addAction( &m_actionRedo );
+    menu->addSeparator();
     menu->addAction( &m_actionNewEvent );
     menu->addAction( &m_actionEditEvent );
     menu->addAction( &m_actionDeleteEvent );
@@ -165,7 +188,6 @@ void EventView::reject()
 void EventView::commitCommand( CharmCommand* command )
 {
     command->finalize();
-    delete command;
 }
 
 void EventView::slotCurrentItemChanged( const QModelIndex& start,
@@ -189,6 +211,14 @@ void EventView::slotCurrentItemChanged( const QModelIndex& start,
 void EventView::setCurrentEvent( const Event& event )
 {
     m_event = event;
+}
+
+void EventView::stageCommand(CharmCommand *command)
+{
+    UndoCharmCommandWrapper* undoCommand = new UndoCharmCommandWrapper(command);
+    connect(command, SIGNAL(emitExecute(CharmCommand*)), this, SIGNAL(emitCommand(CharmCommand*)));
+    connect(command, SIGNAL(emitRollback(CharmCommand*)), this, SIGNAL(emitCommandRollback(CharmCommand*)));
+    m_undoStack->push(undoCommand);
 }
 
 void EventView::slotNewEvent()
@@ -223,7 +253,7 @@ void EventView::slotDeleteEvent()
          == QMessageBox::Yes ) {
         CommandDeleteEvent* command = new CommandDeleteEvent( m_event, this );
         command->prepare();
-        emitCommand( command );
+        stageCommand( command );
     }
 }
 
@@ -336,6 +366,16 @@ void EventView::slotUpdateCurrent()
         setCurrentEvent( event );
     }
     slotUpdateTotal();
+}
+
+void EventView::slotUndoTextChanged(const QString &text)
+{
+    m_actionUndo.setText(tr("Undo %1").arg(text));
+}
+
+void EventView::slotRedoTextChanged(const QString &text)
+{
+    m_actionRedo.setText(tr("Redo %1").arg(text));
 }
 
 void EventView::slotUpdateTotal()
