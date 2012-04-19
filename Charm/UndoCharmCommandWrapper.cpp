@@ -15,3 +15,8 @@ void UndoCharmCommandWrapper::redo()
 {
     m_command->requestExecute();
 }
+
+CharmCommand *UndoCharmCommandWrapper::command()
+{
+    return m_command;
+}

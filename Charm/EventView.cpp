@@ -218,6 +218,7 @@ void EventView::stageCommand(CharmCommand *command)
     UndoCharmCommandWrapper* undoCommand = new UndoCharmCommandWrapper(command);
     connect(command, SIGNAL(emitExecute(CharmCommand*)), this, SIGNAL(emitCommand(CharmCommand*)));
     connect(command, SIGNAL(emitRollback(CharmCommand*)), this, SIGNAL(emitCommandRollback(CharmCommand*)));
+    connect(command, SIGNAL(emitSlotEventIdChanged(int,int)), this, SLOT(slotEventIdChanged(int,int)));
     m_undoStack->push(undoCommand);
 }
 
@@ -378,6 +379,15 @@ void EventView::slotRedoTextChanged(const QString &text)
     m_actionRedo.setText(tr("Redo %1").arg(text));
 }
 
+void EventView::slotEventIdChanged(int oid, int nid)
+{
+    foreach(QObject* o, m_undoStack->children()) {
+        UndoCharmCommandWrapper* w = dynamic_cast<UndoCharmCommandWrapper*>(o);
+        Q_ASSERT(w);
+        w->command()->eventIdChanged(oid, nid);
+    }
+}
+
 void EventView::slotUpdateTotal()
 {   // what matching signal does the proxy emit?
     int seconds = m_model->totalDuration();
@@ -457,17 +467,19 @@ void EventView::slotEditEvent( const Event& event )
     EventEditor editor( event, this );
     if( editor.exec() ) {
         Event newEvent = editor.eventResult();
+
         if ( !newEvent.isValid() ) {
             CommandMakeEvent* command =
                 new CommandMakeEvent( newEvent, this );
             connect( command, SIGNAL( finishedOk( const Event& ) ),
                      this, SLOT( slotEditEventCompleted( const Event& ) ),
                      Qt::QueuedConnection );
-            emitCommand( command );
+            stageCommand( command );
             return;
-
         } else {
-            slotEditEventCompleted( newEvent );
+            CommandModifyEvent* command =
+                new CommandModifyEvent( newEvent, event, this );
+            stageCommand( command );
         }
     }
 }
@@ -475,7 +487,7 @@ void EventView::slotEditEvent( const Event& event )
 void EventView::slotEditEventCompleted( const Event& event )
 {
     CommandModifyEvent* command =
-        new CommandModifyEvent( event, this );
+        new CommandModifyEvent( event, event, this );
     emitCommand( command );
 }
 

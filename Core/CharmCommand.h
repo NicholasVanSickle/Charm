@@ -50,14 +50,19 @@ public:
 
     CommandEmitterInterface* owner() const;
 
-    //used by UndoCharmCommandWrapper to forward requested execute/rollback
-    //forwards to emitExecute/emitRollback
+    //used by UndoCharmCommandWrapper to forward signal firing
+    //forwards to emitExecute/emitRollback/emitRequestSlotEventIdChanged
     void requestExecute();
     void requestRollback();
+    void requestSlotEventIdChanged(int,int);
+
+    //notify CharmCommands in a QUndoStack that an event ID has changed
+    virtual void eventIdChanged(int,int){}
 
 signals:
     void emitExecute(CharmCommand*);
     void emitRollback(CharmCommand*);
+    void emitSlotEventIdChanged(int,int);
 
 private:
     CharmCommand( const CharmCommand& ); // disallow copying

@@ -14,8 +14,8 @@ ModelConnector::ModelConnector()
 {
     connect( &m_dataModel, SIGNAL( makeAndActivateEvent( const Task& ) ),
              SLOT( slotMakeAndActivateEvent( const Task& ) ) );
-    connect( &m_dataModel, SIGNAL( requestEventModification( const Event& ) ),
-             SLOT( slotRequestEventModification( const Event& ) ) );
+    connect( &m_dataModel, SIGNAL( requestEventModification( const Event&, const Event& ) ),
+             SLOT( slotRequestEventModification( const Event&, const Event& ) ) );
     connect( &m_dataModel, SIGNAL( sysTrayUpdate( const QString&, bool ) ),
              SLOT( slotSysTrayUpdate( const QString&, bool ) ) );
     connect( &m_iconTimer, SIGNAL( timeout() ),
@@ -63,9 +63,9 @@ void ModelConnector::slotMakeAndActivateEvent( const Task& task )
     VIEW.sendCommand( command );
 }
 
-void ModelConnector::slotRequestEventModification( const Event& event )
+void ModelConnector::slotRequestEventModification( const Event& event, const Event& old )
 {
-    CommandModifyEvent* command = new CommandModifyEvent( event, this );
+    CommandModifyEvent* command = new CommandModifyEvent( event, old, this );
     VIEW.sendCommand( command );
 }
 

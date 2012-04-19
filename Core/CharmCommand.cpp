@@ -39,4 +39,9 @@ void CharmCommand::requestRollback()
     emit emitRollback(this);
 }
 
+void CharmCommand::requestSlotEventIdChanged(int oid, int nid)
+{
+    emit emitSlotEventIdChanged(oid,nid);
+}
+
 #include "CharmCommand.moc"

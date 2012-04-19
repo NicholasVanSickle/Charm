@@ -16,6 +16,7 @@ public:
     UndoCharmCommandWrapper(CharmCommand* command);
     virtual void undo();
     virtual void redo();
+    CharmCommand* command();
 private:
     CharmCommand* m_command;
 };

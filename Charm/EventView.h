@@ -77,6 +77,7 @@ private slots:
     void slotUpdateCurrent();
     void slotUndoTextChanged(const QString&);
     void slotRedoTextChanged(const QString&);
+    void slotEventIdChanged(int,int);
 
 private:
     Event newSettings();

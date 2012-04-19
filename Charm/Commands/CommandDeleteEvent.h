@@ -17,6 +17,9 @@ public:
     bool rollback( ControllerInterface* );
     bool finalize();
 
+public slots:
+    virtual void eventIdChanged(int,int);
+
 private:
     Event m_event;
 };
